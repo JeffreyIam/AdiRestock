@@ -67,7 +67,7 @@ app.post('/check', (req, res) => {
           } else if (shoeSize === size && quantity <= 1) {
             console.log('No quantity right now. Checking in 5 mins')
             res.end('Out of Stock, will check in 5 minute intervals up for 24 hours until stock is found.')
-            setTimeout(() => { checkSize(gender, productId, number, size) }, 3000)
+            setTimeout(() => { checkSize(gender, productId, number, size) }, 300000)
           }
         }
       }
@@ -102,13 +102,17 @@ app.post('/check', (req, res) => {
       if (error) throw new Error(error)
       let setCookies = response.headers['set-cookie']
       let cookie = ''
-      for (var i = 0; i < setCookies.length; i++) {
-        if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
-          cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
+      if(setCookies !== undefined) {
+        for (var i = 0; i < setCookies.length; i++) {
+          if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
+            cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
+          }
         }
+        cookie = cookie.slice(0, -2)
+        checkSize(gender, productId, number, size, cookie)
+      } else {
+        console.log('setCookies undefined')
       }
-      cookie = cookie.slice(0, -2)
-      checkSize(gender, productId, number, size, cookie)
     })
   }
   getCookies(gender, productId, number, size)
