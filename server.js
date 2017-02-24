@@ -57,25 +57,15 @@ app.post('/getTable', (req, res) => {
       method: 'GET',
       url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
       headers:
-      { 'accept-language': 'en-US,en;q=0.8',
-        'accept-encoding': 'gzip, deflate, sdch',
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
-        'upgrade-insecure-requests': '1',
-        'cache-control': 'no-cache',
-        connection: 'keep-alive',
-        host: 'www.adidas.com',
-        'content-type': 'multipart/form-data; boundary=---011000010111000001101001' },
-      formData:
-      { categoryId: '10052',
-        storeId: '7001',
-        langId: '-1',
-        catalogId: '20001',
-        catEntryId: '553945',
-        quantity: '1',
-        orderId: '.',
-        URL: '/',
-        requesttype: 'ajax' } }
+      { 'Host': 'www.adidas.com',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, sdch',
+        'Accept-Language': 'en-US,en;q=0.8'
+      }
+    }
 
     request(options, function (error, response, body) {
       if (error) throw new Error(error)
@@ -166,47 +156,38 @@ app.post('/check', (req, res) => {
       method: 'GET',
       url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
       headers:
-      { 'accept-language': 'en-US,en;q=0.8',
-        'accept-encoding': 'gzip, deflate, sdch',
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
-        'upgrade-insecure-requests': '1',
-        'cache-control': 'no-cache',
-        connection: 'keep-alive',
-        host: 'www.adidas.com',
-        'content-type': 'multipart/form-data; boundary=---011000010111000001101001' },
-      formData:
-      { categoryId: '10052',
-        storeId: '7001',
-        langId: '-1',
-        catalogId: '20001',
-        catEntryId: '553945',
-        quantity: '1',
-        orderId: '.',
-        URL: '/',
-        requesttype: 'ajax' } }
+      { 'Host': 'www.adidas.com',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, sdch',
+        'Accept-Language': 'en-US,en;q=0.8'
+      }
+    }
 
     request(options, function (error, response, body) {
-      console.log(body)
-      if (error) throw new Error(error)
-      let setCookies = response.headers['set-cookie']
-      let cookie = ''
-      if(setCookies !== undefined) {
-        for (var i = 0; i < setCookies.length; i++) {
-          if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
-            cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
-          }
-        }
-        cookie = cookie.slice(0, -2)
-        checkSize(gender, productId, number, size, cookie)
+      if (error) {
+        console.log('Error retrieving cookies')
+        throw new Error(error)
       } else {
-        console.log(response)
-        console.log('setCookies undefined')
-        getCookies(gender, productId, number, size)
+        let setCookies = response.headers['set-cookie']
+        let cookie = ''
+        if(setCookies !== undefined) {
+          for (var i = 0; i < setCookies.length; i++) {
+            if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
+              cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
+            }
+          }
+          cookie = cookie.slice(0, -2)
+          checkSize(gender, productId, number, size, cookie)
+        } else {
+          console.log(response)
+          console.log('Not getting any cookies to set')
+          setTimeout(() => { getCookies(gender, productId, number, size) }, 300000)
+        }
       }
     })
   }
   getCookies(gender, productId, number, size)
 })
-
-
