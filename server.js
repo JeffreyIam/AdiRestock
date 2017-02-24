@@ -2,11 +2,11 @@ var request = require('request')
 var express = require('express')
 var bodyParser = require('body-parser')
 var chalk = require('chalk')
-var config = require('./config.json')
+// var config = require('./config.json')
 var app = express()
 var port = process.env.PORT || 1337
-var accountSid = process.env.sid || config.key.accountSID
-var authToken = process.env.atoken || config.key.authToken
+var accountSid = process.env.sid
+var authToken = process.env.atoken
 var client = require('twilio')(accountSid, authToken)
 app.use(bodyParser.urlencoded({
   extended: true
