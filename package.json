@@ -1,0 +1,24 @@
+{
+  "name": "Stock Checker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.14.1",
+    "twilio": "^2.11.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeffreyIam/AdiRestock.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JeffreyIam/AdiRestock/issues"
+  },
+  "homepage": "https://github.com/JeffreyIam/AdiRestock#readme"
+}
