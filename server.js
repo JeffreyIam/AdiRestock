@@ -1,13 +1,11 @@
 var request = require('request')
-var chalk = require('chalk')
 var express = require('express')
 var bodyParser = require('body-parser')
+var app = express()
+var port = process.env.PORT
 var accountSid = process.env.sid
 var authToken = process.env.atoken
 var client = require('twilio')(accountSid, authToken)
-var app = express()
-var port = process.env.PORT || 8000
-
 app.use(bodyParser.urlencoded({
   extended: true
 }))
@@ -54,7 +52,7 @@ app.post('/check', (req, res) => {
           var inStock = shoe.avLevels.IN_STOCK
           var quantity = shoe.ATS
           var avStatus = shoe.avStatus
-          shoeSize === size ? console.log(chalk.yellow.bold(shoeSize) + ' : ' + chalk.yellow.bold(quantity) + ' ' + avStatus) : console.log(chalk.cyan.bold(shoeSize) + ' : ' + chalk.green.bold(quantity) + ' ' + avStatus)
+          // shoeSize === size ? console.log(chalk.yellow.bold(shoeSize) + ' : ' + chalk.yellow.bold(quantity) + ' ' + avStatus) : console.log(chalk.cyan.bold(shoeSize) + ' : ' + chalk.green.bold(quantity) + ' ' + avStatus)
           if(shoeSize === size && quantity > 1) {
             client.messages.create({
                 to: `+${number}`,
