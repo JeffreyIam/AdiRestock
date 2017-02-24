@@ -78,7 +78,7 @@
     <script>
 
       function submit() {
-        console.log('submitting')
+        let found = false
         var s = document.getElementById('size')
         var strUser = s.options[s.selectedIndex].value
         var productId = document.getElementById('productId').value.toUpperCase()
@@ -94,16 +94,38 @@
           document.getElementById('status').innerHTML = 'Please select a gender'
         }  else {
           document.getElementById('status').innerHTML = ''
+
           $.ajax({
-            url: 'https://adistockcheck.herokuapp.com/check',
-            // url: 'http://127.0.0.1:1337/check',
-            type: 'POST',
-            data: {'size': strUser, 'productId': productId, 'gender': gender, 'number': number},
+            url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Product-GetVariants?pid=' + productId,
+            type: 'GET',
             success: function (response) {
-              document.getElementById('status').innerHTML = response
-            },
-            error: function (response) {
-              console.log(response)
+              const productDetails = response.variants !== null ? response.variations.variants : []
+              console.log(productDetails)
+              if(productDetails.length > 0) {
+                for(var i = 0; i < productDetails.length; i++) {
+                  let stockQty = productDetails[i].ATS
+                  let size = productDetails[i].attributes.size
+                  if(size === strUser && stockQty > 1) {
+                    found = true
+                    $.ajax({
+                      url: 'https://adistockcheck.herokuapp.com/check',
+                      // url: 'http://127.0.0.1:1337/check',
+                      type: 'POST',
+                      data: {'size': size, 'productId': productId, 'number': number, 'quantity': stockQty},
+                      success: function (response) {
+                        document.getElementById('status').innerHTML = response
+                      },
+                      error: function (response) {
+                        document.getElementById('status').innerHTML = 'Error'
+                      }
+                    })
+                  }
+                }
+                if(!found) {
+                  document.getElementById('status').innerHTML = 'No stock available, leave page open to check again in 5 minutes.'
+                  setTimeout(() => { submit() }, 300000)
+                }
+              }
             }
           })
         }
@@ -112,27 +134,25 @@
       document.querySelector('#createTable').addEventListener('click', () => {
         var productId = document.getElementById('productId').value.toUpperCase()
         var sizeAndStock = document.querySelector('#inventory')
-
         $.ajax({
-          url: 'https://adistockcheck.herokuapp.com/getTable',
-          // url: 'http://127.0.0.1:1337/getTable',
-          type: 'POST',
-          data: {'productId': productId},
+          url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Product-GetVariants?pid=' + productId,
+          type: 'GET',
           success: function (response) {
-            const rowsAndCols = Array.isArray(response) == true ? response.reduce(function (total, current) {
+            console.log(response)
+            const productDetails = response.variants !== null ? response.variations.variants : []
+            const rowsAndCols = productDetails.length > 0 ? productDetails.reduce(function (total, current) {
               const stockQty = current.ATS
               const size = current.attributes.size
               total += '<tr><td>' + size + '</td>' + '<td>' + stockQty + '</td></tr>'
               return total
             }, '') : 'n/a'
             if(rowsAndCols === 'n/a') {
-              sizeAndStock.innerHTML = 'SKU incorrect/Product cannot be found at the moment'
-              } else {
-                sizeAndStock.innerHTML = '<tbody align="center"><tr><th style="text-align:center">Size(US)</th><th style="text-align:center">Stock</th></tr>' + rowsAndCols + '</tbody>'
-              }
-          },
-          error: function (response) {
-            sizeAndStock.innerHTML = 'SKU incorrect/Product cannot be found at the moment'
+              sizeAndStock.innerHTML = 'SKU Incorrect//Product not live yet'
+            } else {
+              sizeAndStock.innerHTML = '<tbody align="center"><tr><th style="text-align:center">Size(US)</th><th style="text-align:center">Stock</th></tr>' + rowsAndCols + '</tbody>'
+            }
+          }, error: function (response) {
+            sizeAndStock.innerHTML = 'SKU Incorrect//Product stock not live yet'
           }
         })
       })
