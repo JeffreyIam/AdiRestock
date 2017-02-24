@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="jquery-1.12.1.js"></script>
+    <script src="./bootstrap.js"></script>
+    <script src="./bootstrap-select.js"></script>
+    <link rel="stylesheet" href="./bootstrap.css"/>
+    <link rel="stylesheet" href="./bootstrap-select.css"/>
+  </head>
+  <body>
+    <div style="text-align:center">
+      <h2>Adidas ReStock</h2>
+      <p> This app will monitor shoe quantity for 24 hours and will text you if your size is restocked.</p>
+    </div>
+    <div class="jumbotron col-sm-6 col-sm-offset-3" style="text-align:center">
+      <div class="container">
+        <div class="form-group" style="text-align:center">
+          <input class="form-control" id="productId" style="width: 220px; margin:auto" placeholder="Product ID"></input>
+          <br>
+          <input class="form-control" style="width: 220px; margin:auto" placeholder="Phone Number"></input>
+        </div>
+        <select class="selectpicker" id="carrier" style="margin: auto; text-align: center" title="Carrier">
+          <option value="att">AT&T</option>
+          <option value="sprint">Sprint</option>
+          <option value="tmobile">T-Mobile</option>
+          <option value="verizon">Verizon</option>
+        </select>
+        <br><br>
+        <select class="selectpicker" id="size" style="margin: auto; text-align: center" title="Size">
+          <option>4</option>
+          <option>5</option>
+          <option>6</option>
+          <option>7</option>
+          <option>8</option>
+          <option>9</option>
+          <option>10</option>
+          <option>11</option>
+          <option>12</option>
+          <option>13</option>
+          <option>14</option>
+          <option>15</option>
+          <option>16</option>
+          <option>17</option>
+          <option>18</option>
+        </select>
+        <br>
+        <div class="radio" id="gender">
+          <label><input type="radio" name="gender" value="male">Male Item</label>
+          <label><input type="radio" name="gender" value="female">Female Item</label>
+        </div>
+        <button class="btn btn-success" onClick="submit()">Notify Me</button>
+      </div>
+    </div>
+    <script>
+
+      function submit() {
+        let s = document.getElementById('size')
+        let strUser = s.options[s.selectedIndex].value
+        let c = document.getElementById('carrier')
+        let carrier = c.options[c.selectedIndex].value
+        let productId = document.getElementById('productId').value
+        let gender = document.querySelector('input[name="gender"]:checked').value
+        $.ajax({
+          url: 'http://localhost:1337/check',
+          type: 'POST',
+          data: {'size': strUser, 'carrier': carrier, 'productId': productId, 'gender': gender},
+          success: function (response) {
+            console.log('submitted')
+            console.log(response)
+          }
+        })
+      }
+
+    </script>
+  </body>
+</html>
