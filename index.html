@@ -37,11 +37,17 @@
           <option>11</option>
           <option>11.5</option>
           <option>12</option>
+          <option>12</option>
           <option>13</option>
+          <option>13.5</option>
           <option>14</option>
+          <option>14.5</option>
           <option>15</option>
+          <option>15.5</option>
           <option>16</option>
+          <option>16.5</option>
           <option>17</option>
+          <option>17.5</option>
           <option>18</option>
         </select>
         <br>
@@ -55,6 +61,20 @@
         <p id="status"></p>
       </div>
     </div>
+    <br><br>
+    <div class="jumbotron col-sm-6 col-sm-offset-3" style="text-align:center">
+
+      <div class="container">
+        <div class="container" style="text-align: center; border: 2px solid black; width: 500px">
+          <h3>Inventory Table</h3>
+          <button id="createTable" class="btn btn-primary">Check Inv</button>
+          <br><br>
+          <div class="container" style="width: 350px; height: 520px; overflow: auto">
+            <table id="inventory" class="table table-striped table-bordered table-condensed table-hover" style="align: center"></table/>
+            </div>
+          </div>
+      </div>
+    <div>
     <script>
 
       function submit() {
@@ -76,6 +96,7 @@
           document.getElementById('status').innerHTML = ''
           $.ajax({
             url: 'https://adistockcheck.herokuapp.com/check',
+            // url: 'http://127.0.0.1:1337/check',
             type: 'POST',
             data: {'size': strUser, 'productId': productId, 'gender': gender, 'number': number},
             success: function (response) {
@@ -87,6 +108,34 @@
           })
         }
       }
+
+      document.querySelector('#createTable').addEventListener('click', () => {
+        var productId = document.getElementById('productId').value.toUpperCase()
+        var sizeAndStock = document.querySelector('#inventory')
+
+        $.ajax({
+          url: 'https://adistockcheck.herokuapp.com/getTable',
+          // url: 'http://127.0.0.1:1337/getTable',
+          type: 'POST',
+          data: {'productId': productId},
+          success: function (response) {
+            const rowsAndCols = Array.isArray(response) == true ? response.reduce(function (total, current) {
+              const stockQty = current.ATS
+              const size = current.attributes.size
+              total += '<tr><td>' + size + '</td>' + '<td>' + stockQty + '</td></tr>'
+              return total
+            }, '') : 'n/a'
+            if(rowsAndCols === 'n/a') {
+              sizeAndStock.innerHTML = 'SKU incorrect/Product cannot be found at the moment'
+              } else {
+                sizeAndStock.innerHTML = '<tbody align="center"><tr><th style="text-align:center">Size(US)</th><th style="text-align:center">Stock</th></tr>' + rowsAndCols + '</tbody>'
+              }
+          },
+          error: function (response) {
+            sizeAndStock.innerHTML = 'SKU incorrect/Product cannot be found at the moment'
+          }
+        })
+      })
 
     </script>
   </body>
