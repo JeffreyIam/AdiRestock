@@ -17,24 +17,25 @@
         <div class="form-group" style="text-align:center">
           <input class="form-control" id="productId" style="width: 220px; margin:auto" placeholder="Product ID"></input>
           <br>
-          <input class="form-control" style="width: 220px; margin:auto" placeholder="Phone Number"></input>
+          <input class="form-control" style="width: 220px; margin:auto" id="phoneNumber" placeholder="Phone Number"></input>
         </div>
-        <select class="selectpicker" id="carrier" style="margin: auto; text-align: center" title="Carrier">
-          <option value="att">AT&T</option>
-          <option value="sprint">Sprint</option>
-          <option value="tmobile">T-Mobile</option>
-          <option value="verizon">Verizon</option>
-        </select>
-        <br><br>
         <select class="selectpicker" id="size" style="margin: auto; text-align: center" title="Size">
           <option>4</option>
+          <option>4.5</option>
           <option>5</option>
+          <option>5.5</option>
           <option>6</option>
+          <option>6.5</option>
           <option>7</option>
+          <option>7.5</option>
           <option>8</option>
+          <option>8.5</option>
           <option>9</option>
+          <option>9.5</option>
           <option>10</option>
+          <option>10.5</option>
           <option>11</option>
+          <option>11.5</option>
           <option>12</option>
           <option>13</option>
           <option>14</option>
@@ -49,26 +50,42 @@
           <label><input type="radio" name="gender" value="female">Female Item</label>
         </div>
         <button class="btn btn-success" onClick="submit()">Notify Me</button>
+        <br>
+        <br>
+        <p id="status"></p>
       </div>
     </div>
     <script>
 
       function submit() {
-        let s = document.getElementById('size')
-        let strUser = s.options[s.selectedIndex].value
-        let c = document.getElementById('carrier')
-        let carrier = c.options[c.selectedIndex].value
-        let productId = document.getElementById('productId').value
-        let gender = document.querySelector('input[name="gender"]:checked').value
-        $.ajax({
-          url: 'http://localhost:1337/check',
-          type: 'POST',
-          data: {'size': strUser, 'carrier': carrier, 'productId': productId, 'gender': gender},
-          success: function (response) {
-            console.log('submitted')
-            console.log(response)
-          }
-        })
+        var s = document.getElementById('size')
+        var strUser = s.options[s.selectedIndex].value
+        var productId = document.getElementById('productId').value.toUpperCase()
+        var number = document.getElementById('phoneNumber').value.replace(/\D/g, '')
+        var gender = document.querySelector('input[name="gender"]:checked') === null ? null : document.querySelector('input[name="gender"]:checked').value
+        if(productId.length <= 3) {
+          document.getElementById('status').innerHTML = 'Please input a correct Product ID'
+        } else if(number.length !== 11) {
+          document.getElementById('status').innerHTML = 'Please input a correct Phone Number'
+        } else if(strUser === "") {
+          document.getElementById('status').innerHTML = 'Please select a size'
+        } else if(gender === null) {
+          document.getElementById('status').innerHTML = 'Please select a gender'
+        }  else {
+          document.getElementById('status').innerHTML = ''
+          $.ajax({
+            url: 'https://adistockcheck.herokuapp.com/check',
+            type: 'POST',
+            data: {'size': strUser, 'productId': productId, 'gender': gender, 'number': number},
+            success: function (response) {
+              console.log(response)
+              if(response === 'N/A') {
+                document.getElementById('status').innerHTML = 'Product not available // Check ID'
+              }
+              console.log(response)
+            }
+          })
+        }
       }
 
     </script>
