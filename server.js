@@ -1,10 +1,12 @@
 var request = require('request')
 var express = require('express')
 var bodyParser = require('body-parser')
+var chalk = require('chalk')
+var config = require('./config.json')
 var app = express()
-var port = process.env.PORT
-var accountSid = process.env.sid
-var authToken = process.env.atoken
+var port = process.env.PORT || 1337
+var accountSid = process.env.sid || config.key.accountSID
+var authToken = process.env.atoken || config.key.authToken
 var client = require('twilio')(accountSid, authToken)
 app.use(bodyParser.urlencoded({
   extended: true
@@ -42,6 +44,7 @@ app.post('/check', (req, res) => {
         setTimeout(() => { checkSize(gender, productId, number, size) }, 600000)
       }
       if (response === undefined || response.body.indexOf('variations') === -1) {
+        console.log(response)
         console.log('PID not valid')
         res.json('N/A')
       } else {
@@ -52,7 +55,7 @@ app.post('/check', (req, res) => {
           var inStock = shoe.avLevels.IN_STOCK
           var quantity = shoe.ATS
           var avStatus = shoe.avStatus
-          // shoeSize === size ? console.log(chalk.yellow.bold(shoeSize) + ' : ' + chalk.yellow.bold(quantity) + ' ' + avStatus) : console.log(chalk.cyan.bold(shoeSize) + ' : ' + chalk.green.bold(quantity) + ' ' + avStatus)
+          shoeSize === size ? console.log(chalk.yellow.bold(shoeSize) + ' : ' + chalk.yellow.bold(quantity) + ' ' + avStatus) : console.log(chalk.cyan.bold(shoeSize) + ' : ' + chalk.green.bold(quantity) + ' ' + avStatus)
           if(shoeSize === size && quantity > 1) {
             client.messages.create({
                 to: `+${number}`,
