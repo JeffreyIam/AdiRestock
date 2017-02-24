@@ -22,8 +22,7 @@ app.listen(port, () => {
 app.post('/getTable', (req, res) => {
   let productId = req.body.productId
 
-  function checkSize(productId, cookie) {
-    console.log(cookie)
+  function checkSize(productId) {
     var sizeOptions = {
       method: 'GET',
       url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Product-GetVariants',
@@ -32,7 +31,6 @@ app.post('/getTable', (req, res) => {
         'Accept': '*/*',
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive',
-        'Cookie': cookie,
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36',
         'Host': 'www.adidas.com',
         'Referer': 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
@@ -43,7 +41,7 @@ app.post('/getTable', (req, res) => {
     request(sizeOptions, function (error, response, body) {
       if (error) {
         console.log(error)
-        setTimeout(() => { getCookies(productId) }, 300000)
+        setTimeout(() => { checkSize(productId) }, 300000)
       } else if (response === undefined || response.body.indexOf('variations') === -1) {
         res.end('PID not valid or product is not live.  Will text you if live.')
       } else {
@@ -52,41 +50,41 @@ app.post('/getTable', (req, res) => {
     })
   }
 
-  function getCookies(productId) {
-    var options = {
-      method: 'GET',
-      url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
-      headers:
-      { 'Host': 'www.adidas.com',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, sdch',
-        'Accept-Language': 'en-US,en;q=0.8'
-      }
-    }
+  // function getCookies(productId) {
+  //   var options = {
+  //     method: 'GET',
+  //     url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
+  //     headers:
+  //     { 'Host': 'www.adidas.com',
+  //       'Connection': 'keep-alive',
+  //       'Upgrade-Insecure-Requests': '1',
+  //       'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+  //       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+  //       'Accept-Encoding': 'gzip, deflate, sdch',
+  //       'Accept-Language': 'en-US,en;q=0.8'
+  //     }
+  //   }
 
-    request(options, function (error, response, body) {
-      if (error) throw new Error(error)
-      let setCookies = response.headers['set-cookie']
-      let cookie = ''
-      if(setCookies !== undefined) {
-        for (var i = 0; i < setCookies.length; i++) {
-          if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
-            cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
-          }
-        }
-        cookie = cookie.slice(0, -2)
-        checkSize(productId, cookie)
-      } else {
-        console.log(response)
-        console.log('setCookies undefined')
-        getCookies(productId)
-      }
-    })
-  }
-  getCookies(productId)
+  //   request(options, function (error, response, body) {
+  //     if (error) throw new Error(error)
+  //     let setCookies = response.headers['set-cookie']
+  //     let cookie = ''
+  //     if(setCookies !== undefined) {
+  //       for (var i = 0; i < setCookies.length; i++) {
+  //         if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
+  //           cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
+  //         }
+  //       }
+  //       cookie = cookie.slice(0, -2)
+  //       checkSize(productId, cookie)
+  //     } else {
+  //       console.log(response)
+  //       console.log('setCookies undefined')
+  //       getCookies(productId)
+  //     }
+  //   })
+  // }
+  checkSize(productId)
 })
 
 app.post('/check', (req, res) => {
@@ -95,8 +93,7 @@ app.post('/check', (req, res) => {
   var number = req.body.number
   var size = req.body.size
 
-  function checkSize(gender, productId, number, size, cookie) {
-    console.log(cookie)
+  function checkSize(gender, productId, number, size) {
     var sizeOptions = {
       method: 'GET',
       url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Product-GetVariants',
@@ -105,7 +102,6 @@ app.post('/check', (req, res) => {
         'Accept': '*/*',
         'Accept-Language': 'en-US,en;q=0.8',
         'Connection': 'keep-alive',
-        'Cookie': cookie,
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36',
         'Host': 'www.adidas.com',
         'Referer': 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
@@ -116,10 +112,10 @@ app.post('/check', (req, res) => {
     request(sizeOptions, function (error, response, body) {
       if (error) {
         console.log(error)
-        setTimeout(() => { getCookies(gender, productId, number, size) }, 300000)
+        setTimeout(() => { checkSize(gender, productId, number, size) }, 300000)
       } else if (response === undefined || response.body.indexOf('variations') === -1) {
         res.end('PID not valid or product is not live.  Will text you if live.')
-        setTimeout(() => { getCookies(gender, productId, number, size) }, 300000)
+        setTimeout(() => { checkSize(gender, productId, number, size) }, 300000)
       } else {
         var sizes = JSON.parse(response.body).variations.variants
         var found = false
@@ -141,7 +137,7 @@ app.post('/check', (req, res) => {
           } else if (shoeSize === size && quantity <= 1) {
             console.log('No quantity right now. Checking in 5 mins')
             res.end('Out of Stock, will text you if restocked.')
-            setTimeout(() => { getCookies(gender, productId, number, size) }, 300000)
+            setTimeout(() => { checkSize(gender, productId, number, size) }, 300000)
           }
         }
         if(!found) {
@@ -151,43 +147,43 @@ app.post('/check', (req, res) => {
     })
   }
 
-  function getCookies(gender, productId, number, size) {
-    var options = {
-      method: 'GET',
-      url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
-      headers:
-      { 'Host': 'www.adidas.com',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, sdch',
-        'Accept-Language': 'en-US,en;q=0.8'
-      }
-    }
+  // function getCookies(gender, productId, number, size) {
+  //   var options = {
+  //     method: 'GET',
+  //     url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
+  //     headers:
+  //     { 'Host': 'www.adidas.com',
+  //       'Connection': 'keep-alive',
+  //       'Upgrade-Insecure-Requests': '1',
+  //       'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+  //       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+  //       'Accept-Encoding': 'gzip, deflate, sdch',
+  //       'Accept-Language': 'en-US,en;q=0.8'
+  //     }
+  //   }
 
-    request(options, function (error, response, body) {
-      if (error) {
-        console.log('Error retrieving cookies')
-        throw new Error(error)
-      } else {
-        let setCookies = response.headers['set-cookie']
-        let cookie = ''
-        if(setCookies !== undefined) {
-          for (var i = 0; i < setCookies.length; i++) {
-            if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
-              cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
-            }
-          }
-          cookie = cookie.slice(0, -2)
-          checkSize(gender, productId, number, size, cookie)
-        } else {
-          console.log(response)
-          console.log('Not getting any cookies to set')
-          setTimeout(() => { getCookies(gender, productId, number, size) }, 300000)
-        }
-      }
-    })
-  }
-  getCookies(gender, productId, number, size)
+  //   request(options, function (error, response, body) {
+  //     if (error) {
+  //       console.log('Error retrieving cookies')
+  //       throw new Error(error)
+  //     } else {
+  //       let setCookies = response.headers['set-cookie']
+  //       let cookie = ''
+  //       if(setCookies !== undefined) {
+  //         for (var i = 0; i < setCookies.length; i++) {
+  //           if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
+  //             cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
+  //           }
+  //         }
+  //         cookie = cookie.slice(0, -2)
+  //         checkSize(gender, productId, number, size, cookie)
+  //       } else {
+  //         console.log(response)
+  //         console.log('Not getting any cookies to set')
+  //         setTimeout(() => { getCookies(gender, productId, number, size) }, 300000)
+  //       }
+  //     }
+  //   })
+  // }
+  checkSize(gender, productId, number, size)
 })
