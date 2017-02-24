@@ -58,6 +58,7 @@
     <script>
 
       function submit() {
+        console.log('submitting')
         var s = document.getElementById('size')
         var strUser = s.options[s.selectedIndex].value
         var productId = document.getElementById('productId').value.toUpperCase()
@@ -78,10 +79,9 @@
             type: 'POST',
             data: {'size': strUser, 'productId': productId, 'gender': gender, 'number': number},
             success: function (response) {
-              console.log(response)
-              if(response === 'N/A') {
-                document.getElementById('status').innerHTML = 'Product not available // Check ID'
-              }
+              document.getElementById('status').innerHTML = response
+            },
+            error: function (response) {
               console.log(response)
             }
           })

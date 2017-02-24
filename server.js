@@ -2,7 +2,7 @@ var request = require('request')
 var express = require('express')
 var bodyParser = require('body-parser')
 var chalk = require('chalk')
-// var config = require('./config.json')
+var config = require('./config.json')
 var app = express()
 var port = process.env.PORT || 1337
 var accountSid = process.env.sid
@@ -22,54 +22,94 @@ app.post('/check', (req, res) => {
   var productId = req.body.productId
   var number = req.body.number
   var size = req.body.size
-  var menSizeTable = {
-  4: '_530', 4.5: '_540', 5: '_550', 5.5: '_560', 6: '_570', 6.5: '_580', 7: '_590', 7.5: '_600', 8: '_610', 8.5: '_620', 9: '_630', 9.5: '_640', 10: '_650', 10.5: '_660', 11: '_670', 11.5: '_680', 12: '_690', 12.5: '_700', 13: '_710', 13.5: '_720', 14: '_730', 14.5: '_740', 15: '_750', 15.5: '_760', 16: '_770'
-  }
-  var womenSizeTable = {
-    5: '_530', 5.5: '_540', 6: '_550', 6.5: '_560', 7: '_570', 7.5: '_580', 8: '_590', 8.5: '_600', 9: '_610', 9.5: '_620', 10: '_630', 10.5: '_640', 11: '_650', 11.5: '_660', 12: '_670'
-  }
 
-  const checkSize = (gender, productId, number, size) => {
+  const checkSize = (gender, productId, number, size, cookie) => {
+    console.log(cookie)
     var sizeOptions = {
-        method: 'GET',
-        url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Product-GetVariants',
-        qs: { pid: productId },
-        headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36',
-        'cache-control': 'no-cache' }
+      method: 'GET',
+      url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Product-GetVariants',
+      qs: { pid: productId },
+      headers: {
+        'Accept': '*/*',
+          // 'Accept-Encoding': 'gzip, deflate, sdch',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Connection': 'keep-alive',
+        'Cookie': cookie,
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36',
+        'Host': 'www.adidas.com',
+        'Referer': 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
     }
 
     request(sizeOptions, function (error, response, body) {
       if (error) {
         console.log(error)
-        setTimeout(() => { checkSize(gender, productId, number, size) }, 600000)
-      }
-      if (response === undefined || response.body.indexOf('variations') === -1) {
+        setTimeout(() => { checkSize(gender, productId, number, size) }, 300000)
+      } else if (response === undefined || response.body.indexOf('variations') === -1) {
         console.log(response)
-        console.log('PID not valid')
-        res.json('N/A')
+        res.end('PID not valid')
       } else {
         var sizes = JSON.parse(response.body).variations.variants
         for (var i = 0; i < sizes.length; i++) {
           var shoe = sizes[i]
           var shoeSize = shoe.attributes.size
-          var inStock = shoe.avLevels.IN_STOCK
           var quantity = shoe.ATS
           var avStatus = shoe.avStatus
           shoeSize === size ? console.log(chalk.yellow.bold(shoeSize) + ' : ' + chalk.yellow.bold(quantity) + ' ' + avStatus) : console.log(chalk.cyan.bold(shoeSize) + ' : ' + chalk.green.bold(quantity) + ' ' + avStatus)
-          if(shoeSize === size && quantity > 1) {
+          if (shoeSize === size && quantity > 1) {
             client.messages.create({
-                to: `+${number}`,
-                from: "+16697211202",
-                body: `ID: ${productId}, Size: ${size} restocked! Quantity: ${quantity} http://www.adidas.com/us/search?q=${productId}`
-            }, function(err, message) {
+              to: `+${number}`,
+              from: '+16697211202',
+              body: `ID: ${productId}, Size: ${size} restocked! Quantity: ${quantity} http://www.adidas.com/us/search?q=${productId}`
             })
-          } else if(shoeSize === size && quantity <= 1) {
+            res.end('Found & sent text message alert!')
+          } else if (shoeSize === size && quantity <= 1) {
             console.log('No quantity right now. Checking in 5 mins')
-            setTimeout(() => { checkSize(gender, productId, number, size) }, 300000)
+            res.end('Out of Stock, will check in 5 minute intervals up for 24 hours until stock is found.')
+            setTimeout(() => { checkSize(gender, productId, number, size) }, 3000)
           }
         }
       }
     })
   }
-  checkSize(gender, productId, number, size)
+
+  const getCookies = (gender, productId, number, size) => {
+    var options = { method: 'GET',
+      url: 'http://www.adidas.com/on/demandware.store/Sites-adidas-US-Site/en_US/Page-HeaderInfo',
+      headers:
+      { 'accept-language': 'en-US,en;q=0.8',
+        'accept-encoding': 'gzip, deflate, sdch',
+        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+        'upgrade-insecure-requests': '1',
+        'cache-control': 'no-cache',
+        connection: 'keep-alive',
+        host: 'www.adidas.com',
+        'content-type': 'multipart/form-data; boundary=---011000010111000001101001' },
+      formData:
+      { categoryId: '10052',
+        storeId: '7001',
+        langId: '-1',
+        catalogId: '20001',
+        catEntryId: '553945',
+        quantity: '1',
+        orderId: '.',
+        URL: '/',
+        requesttype: 'ajax' } }
+
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error)
+      let setCookies = response.headers['set-cookie']
+      let cookie = ''
+      for (var i = 0; i < setCookies.length; i++) {
+        if (setCookies[i].indexOf('dwpersonalization') === -1 && setCookies[i].indexOf('username') === -1) {
+          cookie += setCookies[i].match(/^(.*?);/)[0] + ' '
+        }
+      }
+      cookie = cookie.slice(0, -2)
+      checkSize(gender, productId, number, size, cookie)
+    })
+  }
+  getCookies(gender, productId, number, size)
 })
