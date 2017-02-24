@@ -51,10 +51,7 @@
           <option>18</option>
         </select>
         <br>
-        <div class="radio" id="gender">
-          <label><input type="radio" name="gender" value="male">Male Item</label>
-          <label><input type="radio" name="gender" value="female">Female Item</label>
-        </div>
+        <br>
         <button class="btn btn-success" onClick="submit()">Notify Me</button>
         <br>
         <br>
@@ -83,16 +80,13 @@
         var strUser = s.options[s.selectedIndex].value
         var productId = document.getElementById('productId').value.toUpperCase()
         var number = document.getElementById('phoneNumber').value.replace(/\D/g, '')
-        var gender = document.querySelector('input[name="gender"]:checked') === null ? null : document.querySelector('input[name="gender"]:checked').value
         if(productId.length <= 3) {
           document.getElementById('status').innerHTML = 'Please input a correct Product ID'
         } else if(number.length !== 11) {
           document.getElementById('status').innerHTML = 'Please input a correct Phone Number // Format: 14159528888'
         } else if(strUser === "") {
           document.getElementById('status').innerHTML = 'Please select a size'
-        } else if(gender === null) {
-          document.getElementById('status').innerHTML = 'Please select a gender'
-        }  else {
+        } else {
           document.getElementById('status').innerHTML = ''
 
           $.ajax({
