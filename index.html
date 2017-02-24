@@ -108,7 +108,7 @@
                   if(size === strUser && stockQty > 1) {
                     found = true
                     $.ajax({
-                      url: 'https://adistockcheck.herokuapp.com/check',
+                      url: 'http://adistockcheck.herokuapp.com/check',
                       // url: 'http://127.0.0.1:1337/check',
                       type: 'POST',
                       data: {'size': size, 'productId': productId, 'number': number, 'quantity': stockQty},
