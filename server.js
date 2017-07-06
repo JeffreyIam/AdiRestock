@@ -10,7 +10,7 @@ var accountSid = process.env.sid
 var authToken = process.env.atoken
 var hashTable = {}
 // || config.key.authToken
-var client = require('twilio')(accountSid, authToken)
+// var client = require('twilio')(accountSid, authToken)
 app.use(bodyParser.urlencoded({
   extended: true
 }))
@@ -22,33 +22,36 @@ app.listen(port, () => {
 
 setInterval(()=>{
   request('http://www.reddit.com/r/nba/hot.json?sort=new', (err,res, body) => {
+    console.log('Checking for new!')
     JSON.parse(body)["data"]['children'].forEach((topic)=>{
       var title = topic['data']['title']
+      var url = topic['data']['url']
       if(!hashTable[title]) {
         hashTable[title] = title
           client.messages.create({
           to: `+14082420811`,
           from: '+16697211202',
-          body: `Title: ${title}`
+          body: `Title: ${title}, Url: ${url}`
         })
       }
     })
   })
 }, 1800000)
 
-request('http://www.reddit.com/r/nba/hot.json?sort=new', (err,res, body) => {
-  JSON.parse(body)["data"]['children'].forEach((topic)=>{
-    var title = topic['data']['title']
-    if(!hashTable[title]) {
-      hashTable[title] = title
-        client.messages.create({
-        to: `+14082420811`,
-        from: '+16697211202',
-        body: `Title: ${title}`
-      })
-    }
-  })
-})
+// request('http://www.reddit.com/r/nba/hot.json?sort=new', (err,res, body) => {
+//   JSON.parse(body)["data"]['children'].forEach((topic)=>{
+//     var title = topic['data']['title']
+//     var url = topic['data']['url']
+//     if(!hashTable[title]) {
+//       hashTable[title] = title
+//         client.messages.create({
+//         to: `+14082420811`,
+//         from: '+16697211202',
+//         body: `Title: ${title}, Url: ${url}`
+//       })
+//     }
+//   })
+// })
 
 
 // app.post('/check', (req, res) => {
